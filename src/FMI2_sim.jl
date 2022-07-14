@@ -865,7 +865,8 @@ function fmi2SimulateCS(fmu::FMU2, c::Union{FMU2Component, Nothing}=nothing, t_s
                         inputValueReferences::fmi2ValueReferenceFormat = nothing,
                         inputFunction = nothing,
                         showProgress::Bool=true,
-                        parameters::Union{Dict{<:Any, <:Any}, Nothing} = nothing)
+                        parameters::Union{Dict{<:Any, <:Any}, Nothing} = nothing,
+                        maxWallTime::Union{Nothing, Float64}=nothing)
 
     @assert fmi2IsCoSimulation(fmu) "fmi2SimulateCS(...): This function supports Co-Simulation FMUs only."
     #@assert fmu.type == fmi2TypeCoSimulation "fmi2SimulateCS(...): This FMU supports Co-Simulation, but was instantiated in ME mode. Use `fmiLoad(...; type=:CS)`."
@@ -931,8 +932,13 @@ function fmi2SimulateCS(fmu::FMU2, c::Union{FMU2Component, Nothing}=nothing, t_s
         svalues = (fmi2GetReal(c, recordValues)...,)
         DiffEqCallbacks.copyat_or_push!(fmusol.values.t, i, t)
         DiffEqCallbacks.copyat_or_push!(fmusol.values.saveval, i, svalues, Val{false})
-
+        start_cpu_time = time()
         while t < t_stop
+            if !isnothing(maxWallTime) && time() - start_cpu_time > maxWallTime
+                @error "Maximum Time Exceeded!"
+                error(1)
+            end
+
             if variableSteps
                 if length(saveat) > i
                     dt = saveat[i+1] - saveat[i]
