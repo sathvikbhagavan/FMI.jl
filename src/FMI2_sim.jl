@@ -505,7 +505,7 @@ function setInInitialization(mv::FMIImport.fmi2ScalarVariable)
 end
 
 function prepareFMU(fmu::FMU2, c::Union{Nothing, FMU2Component}, type::fmi2Type, instantiate::Union{Nothing, Bool}, terminate::Union{Nothing, Bool}, reset::Union{Nothing, Bool}, setup::Union{Nothing, Bool}, parameters::Union{Dict{<:Any, <:Any}, Nothing}, t_start, t_stop, tolerance;
-    x0::Union{AbstractArray{<:Real}, Nothing}=nothing, inputFunction=nothing, inputValueReferences=nothing)
+    x0::Union{AbstractArray{<:Real}, Nothing}=nothing, inputFunction=nothing, inputValueReferences=nothing,  recordValues=nothing)
 
     if instantiate === nothing 
         instantiate = fmu.executionConfig.instantiate
@@ -565,7 +565,7 @@ function prepareFMU(fmu::FMU2, c::Union{Nothing, FMU2Component}, type::fmi2Type,
         inputs = Dict{fmi2ValueReference, Any}()
 
         if fmu.type == 1 #CS
-            initial_output = fmi2GetReal(c, fmi2GetOutputNames(fmu) .|> string)
+            initial_output = fmi2GetReal(c, recordValues)
             inputValues = inputFunction(c, initial_output, t_start)
         else #ME
             initial_state = fmi2GetReal(c, fmi2GetStateNames(fmu) .|> string)
@@ -1051,7 +1051,7 @@ function fmi2SimulateCS(fmu::FMU2, c::Union{FMU2Component, Nothing}=nothing, t_s
     dt = dt === nothing ? fmi2GetDefaultStepSize(fmu.modelDescription) : dt
     dt = dt === nothing ? 1e-3 : dt
 
-    c, _ = prepareFMU(fmu, c, fmi2TypeCoSimulation, instantiate, terminate, reset, setup, parameters, t_start, t_stop, tolerance; inputFunction=_inputFunction, inputValueReferences=inputValueReferences)
+    c, _ = prepareFMU(fmu, c, fmi2TypeCoSimulation, instantiate, terminate, reset, setup, parameters, t_start, t_stop, tolerance; inputFunction=_inputFunction, inputValueReferences=inputValueReferences, recordValues=recordValues)
 
     # default setup
     if length(saveat) == 0
