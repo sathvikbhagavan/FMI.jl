@@ -564,16 +564,19 @@ function prepareFMU(fmu::FMU2, c::Union{Nothing, FMU2Component}, type::fmi2Type,
         # set inputs
         inputs = Dict{fmi2ValueReference, Any}()
 
-        inputValues = nothing
-        if hasmethod(inputFunction, Tuple{FMU2Component, fmi2Real}) # CS
-            inputValues = inputFunction(c, t_start)
-        else # ME
-            inputValues = inputFunction(c, nothing, t_start)
+        if fmu.type == 1 #CS
+            initial_output = fmi2GetReal(c, fmi2GetOutputNames(fmu) .|> string)
+            inputValues = inputFunction(c, initial_output, t_start)
+        else #ME
+            initial_state = fmi2GetReal(c, fmi2GetStateNames(fmu) .|> string)
+            inputValues = inputFunction(c, initial_state, t_start)
         end
 
-        for i in 1:length(inputValueReferences)
-            vr = inputValueReferences[i]
-            inputs[vr] = inputValues[i]
+        if inputValues !== nothing
+            for i in 1:length(inputValueReferences)
+                vr = inputValueReferences[i]
+                inputs[vr] = inputValues[i]
+            end
         end
     end
 
@@ -824,21 +827,7 @@ function fmi2SimulateME(fmu::FMU2, c::Union{FMU2Component, Nothing}=nothing, t_s
     #@assert fmu.type == fmi2TypeModelExchange "fmi2SimulateME(...): This FMU supports Model Exchange, but was instantiated in CS mode. Use `fmiLoad(...; type=:ME)`."
 
     # input function handling 
-    _inputFunction = nothing
-    if inputFunction != nothing
-        if hasmethod(inputFunction, Tuple{fmi2Real})
-            _inputFunction = (c, u, t) -> inputFunction(t)
-        elseif  hasmethod(inputFunction, Tuple{Union{FMU2Component, Nothing}, fmi2Real})
-            _inputFunction = (c, u, t) -> inputFunction(c, t)
-        elseif  hasmethod(inputFunction, Tuple{Union{FMU2Component, Nothing}, AbstractArray{fmi2Real,1}})
-            _inputFunction = (c, u, t) -> inputFunction(c, u)
-        elseif  hasmethod(inputFunction, Tuple{AbstractArray{fmi2Real,1}, fmi2Real})
-            _inputFunction = (c, u, t) -> inputFunction(u, t)
-        else 
-            _inputFunction = inputFunction
-        end
-        @assert hasmethod(_inputFunction, Tuple{FMU2Component, Union{AbstractArray{fmi2Real,1}, Nothing}, fmi2Real}) "The given input function does not fit the needed input function pattern for ME-FMUs, which are: \n- `inputFunction(t::fmi2Real)`\n- `inputFunction(comp::FMU2Component, t::fmi2Real)`\n- `inputFunction(comp::FMU2Component, u::Union{AbstractArray{fmi2Real,1}, Nothing})`\n- `inputFunction(u::Union{AbstractArray{fmi2Real,1}, Nothing}, t::fmi2Real)`\n- `inputFunction(comp::FMU2Component, u::Union{AbstractArray{fmi2Real,1}, Nothing}, t::fmi2Real)`"
-    end
+    _inputFunction = (c, u, t) -> inputFunction(u, t)
 
     recordValues = prepareValueReference(fmu, recordValues)
     inputValueReferences = prepareValueReference(fmu, inputValueReferences)
@@ -1042,12 +1031,7 @@ function fmi2SimulateCS(fmu::FMU2, c::Union{FMU2Component, Nothing}=nothing, t_s
     # input function handling 
     _inputFunction = nothing
     if inputFunction != nothing
-        if hasmethod(inputFunction, Tuple{fmi2Real})
-            _inputFunction = (c, t) -> inputFunction(t)
-        else 
-            _inputFunction = inputFunctiont
-        end
-        @assert hasmethod(_inputFunction, Tuple{FMU2Component, fmi2Real}) "The given input function does not fit the needed input function pattern for CS-FMUs, which are: \n- `inputFunction(t::fmi2Real)`\n- `inputFunction(comp::FMU2Component, t::fmi2Real)`"
+        _inputFunction = (c, u, t) -> inputFunction(u, t)
     end
 
     fmusol = FMU2Solution(fmu)
@@ -1111,7 +1095,7 @@ function fmi2SimulateCS(fmu::FMU2, c::Union{FMU2Component, Nothing}=nothing, t_s
             end
 
             if _inputFunction != nothing
-                fmi2SetReal(c, inputValueReferences, _inputFunction(c, t))
+                fmi2SetReal(c, inputValueReferences, _inputFunction(c, collect(svalues), t))
             end
 
             fmi2DoStep(c, dt; currentCommunicationPoint=t)
@@ -1145,7 +1129,7 @@ function fmi2SimulateCS(fmu::FMU2, c::Union{FMU2Component, Nothing}=nothing, t_s
             end
 
             if _inputFunction != nothing
-                fmi2SetReal(c, inputValueReferences, _inputFunction(c, t))
+                fmi2SetReal(c, inputValueReferences, _inputFunction(c, nothing, t))
             end
 
             fmi2DoStep(c, dt; currentCommunicationPoint=t)
