@@ -157,7 +157,10 @@ p = [s0, v0, c, m]
 obj_before = objective(p) # not really good!
 ```
 
-    [34mSimulating ME-FMU ... 100%|██████████████████████████████| Time: 0:00:09[39m
+    [33m[1m┌ [22m[39m[33m[1mWarning: [22m[39mUsing arrays or dicts to store parameters of different types can hurt performance.
+    [33m[1m│ [22m[39mConsider using tuples instead.
+    [33m[1m└ [22m[39m[90m@ SciMLBase ~/.julia/packages/SciMLBase/kTUaf/src/performance_warnings.jl:32[39m
+    [34mSimulating ME-FMU ... 100%|██████████████████████████████| Time: 0:00:24[39m
 
 
 

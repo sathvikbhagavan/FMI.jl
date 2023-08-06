@@ -93,8 +93,8 @@ workers()
 ```
 
     Hello World!
-          From worker 3:	Hello World!
           From worker 2:	Hello World!
+          From worker 3:	Hello World!
 
 
 ### Simulation setup
@@ -115,22 +115,22 @@ input_values = collect(collect.(eachrow(rand(batchSize,2))))
 
 
     16-element Vector{Vector{Float64}}:
-     [0.9221270972112574, 0.34594410211041615]
-     [0.6777517388913372, 0.10113097285521766]
-     [0.9563200128368023, 0.6051828115133889]
-     [0.11098131222116736, 0.4032187049399426]
-     [0.03311203023601572, 0.33350972013478963]
-     [0.9421319414382189, 0.3769778586680509]
-     [0.39836050322078476, 0.27825655985695963]
-     [0.24332378364229845, 0.7288282876275598]
-     [0.8976151004875467, 0.8118827499419085]
-     [0.750320143635261, 0.8558194902293396]
-     [0.3032258895868367, 0.9101560708861398]
-     [0.8644581004423624, 0.3145205233309337]
-     [0.4031411571361374, 0.6506178159149139]
-     [0.4534441702444991, 0.9918713589537774]
-     [0.5139477116760417, 0.30303698302797843]
-     [0.03099485000338853, 0.816333087445523]
+     [0.7009592632073671, 0.14122291447485136]
+     [0.8519292905409173, 0.7104494732070307]
+     [0.7606686308505661, 0.49840360207929746]
+     [0.565472181549699, 0.04185919969249141]
+     [0.7788103334923618, 0.7887233988123873]
+     [0.007288799443920135, 0.7143050138806146]
+     [0.6148902464818164, 0.009614329303400448]
+     [0.0115559933710212, 0.6372517905888284]
+     [0.5925652462865798, 0.45044685351427993]
+     [0.3435282290087226, 0.14632715398553608]
+     [0.8854273284681342, 0.2100108915729616]
+     [0.7987025257553151, 0.9882778011693342]
+     [0.43449998729462125, 0.744833838733684]
+     [0.8381116389870525, 0.38878269943700017]
+     [0.45890039802697047, 0.602872539679466]
+     [0.2451410335013151, 0.6865506033614049]
 
 
 
@@ -170,19 +170,24 @@ Running a single evaluation is pretty quick, therefore the speed can be better t
 @benchmark data = runCalcFormatted(SharedModule.model_fmu, rand(2))
 ```
 
+    [33m[1m┌ [22m[39m[33m[1mWarning: [22m[39mUsing arrays or dicts to store parameters of different types can hurt performance.
+    [33m[1m│ [22m[39mConsider using tuples instead.
+    [33m[1m└ [22m[39m[90m@ SciMLBase ~/.julia/packages/SciMLBase/kTUaf/src/performance_warnings.jl:32[39m
 
 
 
-    BenchmarkTools.Trial: 4 samples with 1 evaluation.
-     Range [90m([39m[36m[1mmin[22m[39m … [35mmax[39m[90m):  [39m[36m[1m1.510 s[22m[39m … [35m  1.549 s[39m  [90m┊[39m GC [90m([39mmin … max[90m): [39m4.39% … 6.97%
-     Time  [90m([39m[34m[1mmedian[22m[39m[90m):     [39m[34m[1m1.542 s              [22m[39m[90m┊[39m GC [90m([39mmedian[90m):    [39m6.91%
-     Time  [90m([39m[32m[1mmean[22m[39m ± [32mσ[39m[90m):   [39m[32m[1m1.536 s[22m[39m ± [32m17.572 ms[39m  [90m┊[39m GC [90m([39mmean ± σ[90m):  [39m6.33% ± 1.29%
+
+
+    BenchmarkTools.Trial: 3 samples with 1 evaluation.
+     Range [90m([39m[36m[1mmin[22m[39m … [35mmax[39m[90m):  [39m[36m[1m1.674 s[22m[39m … [35m  1.704 s[39m  [90m┊[39m GC [90m([39mmin … max[90m): [39m3.70% … 3.66%
+     Time  [90m([39m[34m[1mmedian[22m[39m[90m):     [39m[34m[1m1.678 s              [22m[39m[90m┊[39m GC [90m([39mmedian[90m):    [39m3.70%
+     Time  [90m([39m[32m[1mmean[22m[39m ± [32mσ[39m[90m):   [39m[32m[1m1.685 s[22m[39m ± [32m16.533 ms[39m  [90m┊[39m GC [90m([39mmean ± σ[90m):  [39m3.69% ± 0.02%
     
-      [39m█[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [32m [39m[39m [39m [39m [39m█[34m [39m[39m [39m [39m [39m [39m [39m [39m [39m█[39m [39m [39m [39m [39m [39m█[39m [39m 
-      [39m█[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[32m▁[39m[39m▁[39m▁[39m▁[39m█[34m▁[39m[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m█[39m▁[39m▁[39m▁[39m▁[39m▁[39m█[39m [39m▁
-      1.51 s[90m         Histogram: frequency by time[39m        1.55 s [0m[1m<[22m
+      [34m█[39m[39m [39m [39m [39m [39m [39m█[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [32m [39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m█[39m [39m 
+      [34m█[39m[39m▁[39m▁[39m▁[39m▁[39m▁[39m█[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[32m▁[39m[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m▁[39m█[39m [39m▁
+      1.67 s[90m         Histogram: frequency by time[39m         1.7 s [0m[1m<[22m
     
-     Memory estimate[90m: [39m[33m402.92 MiB[39m, allocs estimate[90m: [39m[33m11401359[39m.
+     Memory estimate[90m: [39m[33m467.05 MiB[39m, allocs estimate[90m: [39m[33m12001282[39m.
 
 
 
@@ -202,8 +207,8 @@ println("Single Threaded")
 
 
     BenchmarkTools.Trial: 1 sample with 1 evaluation.
-     Single result which took [34m24.308 s[39m (6.38% GC) to evaluate,
-     with a memory estimate of [33m6.30 GiB[39m, over [33m182422556[39m allocations.
+     Single result which took [34m26.489 s[39m (3.99% GC) to evaluate,
+     with a memory estimate of [33m7.30 GiB[39m, over [33m192020500[39m allocations.
 
 
 
@@ -218,14 +223,20 @@ println("Multi Threaded")
 ```
 
     Multi Threaded
+          From worker 2:	[33m[1m┌ [22m[39m[33m[1mWarning: [22m[39mUsing arrays or dicts to store parameters of different types can hurt performance.
+          From worker 2:	[33m[1m│ [22m[39mConsider using tuples instead.
+          From worker 2:	[33m[1m└ [22m[39m[90m@ SciMLBase ~/.julia/packages/SciMLBase/kTUaf/src/performance_warnings.jl:32[39m
+          From worker 3:	[33m[1m┌ [22m[39m[33m[1mWarning: [22m[39mUsing arrays or dicts to store parameters of different types can hurt performance.
+          From worker 3:	[33m[1m│ [22m[39mConsider using tuples instead.
+          From worker 3:	[33m[1m└ [22m[39m[90m@ SciMLBase ~/.julia/packages/SciMLBase/kTUaf/src/performance_warnings.jl:32[39m
 
 
 
 
 
     BenchmarkTools.Trial: 1 sample with 1 evaluation.
-     Single result which took [34m13.216 s[39m (0.00% GC) to evaluate,
-     with a memory estimate of [33m85.34 KiB[39m, over [33m1426[39m allocations.
+     Single result which took [34m14.135 s[39m (0.00% GC) to evaluate,
+     with a memory estimate of [33m86.27 KiB[39m, over [33m1457[39m allocations.
 
 
 
