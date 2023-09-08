@@ -827,7 +827,7 @@ function fmi2SimulateME(fmu::FMU2, c::Union{FMU2Component, Nothing}=nothing, t_s
     #@assert fmu.type == fmi2TypeModelExchange "fmi2SimulateME(...): This FMU supports Model Exchange, but was instantiated in CS mode. Use `fmiLoad(...; type=:ME)`."
 
     # input function handling 
-    _inputFunction = (c, u, t) -> inputFunction(u, t)
+    _inputFunction = isnothing(inputFunction) ? nothing : (c, u, t) -> inputFunction(u, t)
 
     recordValues = prepareValueReference(fmu, recordValues)
     inputValueReferences = prepareValueReference(fmu, inputValueReferences)
