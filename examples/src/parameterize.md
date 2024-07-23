@@ -1,5 +1,9 @@
-# Manually parameterize an FMU
-Tutorial by Johannes Stoljar, Tobias Thummerer
+# Parameterize a FMU
+Tutorial by Tobias Thummerer, Johannes Stoljar
+
+Last update: 09.08.2023
+
+🚧 This tutorial is under revision and will be replaced by an up-to-date version soon 🚧
 
 ## License
 
@@ -10,28 +14,11 @@ Tutorial by Johannes Stoljar, Tobias Thummerer
 # See LICENSE (https://github.com/thummeto/FMI.jl/blob/main/LICENSE) file in the project root for details.
 ```
 
-## Motivation
-This Julia Package *FMI.jl* is motivated by the use of simulation models in Julia. Here the FMI specification is implemented. FMI (*Functional Mock-up Interface*) is a free standard ([fmi-standard.org](http://fmi-standard.org/)) that defines a container and an interface to exchange dynamic models using a combination of XML files, binaries and C code zipped into a single file. The user can thus use simulation models in the form of an FMU (*Functional Mock-up Units*). Besides loading the FMU, the user can also set values for parameters and states and simulate the FMU both as co-simulation and model exchange simulation.
-
-## Introduction to the example
-This example shows how the manually parameterization of an FMU works if very specific adjustments during system initialization is needed. For this purpose, an IO-FMU model is loaded and the various commands for parameterization are shown on the basis of this model. With this example the user shall be guided how to make certain settings at an FMU. Please note, that parameterization of a simulation is possible in a much easier fashion: Using `fmiSimulate`, `fmiSimulateME` or `fmiSimulateCS` together with a parameter dictionary for the keyword `parameters`.
-
-## Target group
-The example is primarily intended for users who work in the field of simulation exchange. The example wants to show how simple it is to use FMUs in Julia.
-
+## Introduction
+This example shows how to parameterize a FMU. We will show to possible ways to parameterize: The default option using the parameterization feature of `fmiSimulate`, `fmiSimulateME` or `fmiSimulateCS`. Second, a custom parameterization routine for advanced users. 
 
 ## Other formats
 Besides, this [Jupyter Notebook](https://github.com/thummeto/FMI.jl/blob/examples/examples/src/parameterize.ipynb) there is also a [Julia file](https://github.com/thummeto/FMI.jl/blob/examples/examples/src/parameterize.jl) with the same name, which contains only the code cells and for the documentation there is a [Markdown file](https://github.com/thummeto/FMI.jl/blob/examples/examples/src/parameterize.md) corresponding to the notebook.  
-
-
-## Getting started
-
-### Installation prerequisites
-|     | Description                       | Command                   | Alternative                                    |   
-|:----|:----------------------------------|:--------------------------|:-----------------------------------------------|
-| 1.  | Enter Package Manager via         | ]                         |                                                |
-| 2.  | Install FMI via                   | add FMI                   | add " https://github.com/ThummeTo/FMI.jl "     |
-| 3.  | Install FMIZoo via                | add FMIZoo                | add " https://github.com/ThummeTo/FMIZoo.jl "  |
 
 ## Code section
 
@@ -71,10 +58,11 @@ In the next lines of code the FMU model from *FMIZoo.jl* is loaded and the infor
 
 ```julia
 # we use an FMU from the FMIZoo.jl
+# just replace this line with a local path if you want to use your own FMU
 pathToFMU = get_model_filename("IO", "Dymola", "2022x")
 
-myFMU = fmiLoad(pathToFMU)
-fmiInfo(myFMU)
+fmu = fmiLoad(pathToFMU)
+fmiInfo(fmu)
 ```
 
     #################### Begin information for FMU ####################
@@ -108,7 +96,26 @@ fmiInfo(myFMU)
     		Serialize State:	true
     		Dir. Derivatives:	true
     ##################### End information for FMU #####################
+    
 
+### Option A: Integrated parameterization feature of *FMI.jl*
+If you are using the commands for simulation integrated in *FMI.jl*, the parameters and initial conditions are set at the correct locations during the initialization process of your FMU. This is the recommended way of parameterizing your model, if you don't have very uncommon requirements regarding initialization.
+
+
+```julia
+dict = Dict{String, Any}()
+dict
+```
+
+
+
+
+    Dict{String, Any}()
+
+
+
+### Option B: Custom parameterization routine
+If you have special requirements for initialization and parameterization, you can write your very own parameterization routine.
 
 ### Instantiate and Setup FMU
 
@@ -116,7 +123,7 @@ Next it is necessary to create an instance of the FMU. This is achieved by the c
 
 
 ```julia
-fmiInstantiate!(myFMU; loggingOn=true)
+fmiInstantiate!(fmu; loggingOn=true)
 ```
 
 
@@ -124,7 +131,7 @@ fmiInstantiate!(myFMU; loggingOn=true)
 
     FMU:            IO
     InstanceName:   IO
-    Address:        Ptr{Nothing} @0x0000000013429690
+    Address:        Ptr{Nothing} @0x000001fbb9419910
     State:          0
     Logging:        1
     FMU time:       -Inf
@@ -136,7 +143,7 @@ In the following code block, start and end time for the simulation is set by the
 
 
 ```julia
-fmiSetupExperiment(myFMU, tStart, tStop)
+fmiSetupExperiment(fmu, tStart, tStop)
 ```
 
 
@@ -170,7 +177,7 @@ At the beginning we want to display the initial state of these parameters, for w
 
 
 ```julia
-fmiEnterInitializationMode(myFMU)
+fmiEnterInitializationMode(fmu)
 ```
 
 
@@ -184,7 +191,7 @@ The initial state of these parameters are displayed with the function `fmiGet()`
 
 
 ```julia
-fmiGet(myFMU, params)
+fmiGet(fmu, params)
 ```
 
 
@@ -202,7 +209,7 @@ The initialization mode is terminated with the function `fmiExitInitializationMo
 
 
 ```julia
-fmiExitInitializationMode(myFMU)
+fmiExitInitializationMode(fmu)
 ```
 
 
@@ -243,7 +250,7 @@ paramsVal = generateRandomNumbers()
 
 
 
-    (38.15822216433163, true, 32, "Random number 78.0912293635972!")
+    (22.092766687157837, true, 41, "Random number 50.28734370163779!")
 
 
 
@@ -253,32 +260,10 @@ To show the first variant, it is necessary to terminate and reset the FMU instan
 
 
 ```julia
-fmiTerminate(myFMU)
-fmiReset(myFMU)
-fmiSetupExperiment(myFMU, tStart, tStop)
+fmiTerminate(fmu)
+fmiReset(fmu)
+fmiSetupExperiment(fmu, tStart, tStop)
 ```
-
-    [[32mOK[0m][CvodeStatistics][IO]: Sundials CVode Statistics
-        Stop time                                : 0.00 s
-        Simulation time                          : 2.28 s
-        Number of external steps                 : 0
-        Number of internal steps                 : 0
-        Number of non-linear iterations          : 0
-        Number of non-linear convergence failures: 0
-        Number of f function evaluations         : 0
-        Number of g function evaluations         : 0
-        Number of Jacobian-evaluations (direct)  : 22
-        Maximum integration order                : 0
-        Suggested tolerance scale factor         : 1.0
-        Grouping used                            : no
-    
-    [[32mOK[0m][][IO]: Rejected count
-        Number of external steps                 : 0
-        Number of internal steps                 : 0
-        Number of f function evaluations         : 0
-        Number of Jac function evaluations       : 0
-    
-
 
 
 
@@ -291,7 +276,7 @@ In the next step it is possible to set the parameters for the FMU. With the firs
 
 
 ```julia
-fmiSet(myFMU, params, collect(paramsVal))
+fmiSet(fmu, params, collect(paramsVal))
 ```
 
 
@@ -309,9 +294,9 @@ After setting the parameters, it can be checked whether the corresponding parame
 
 
 ```julia
-fmiEnterInitializationMode(myFMU)
-# fmiGet(myFMU, params)
-fmiExitInitializationMode(myFMU)
+fmiEnterInitializationMode(fmu)
+# fmiGet(fmu, params)
+fmiExitInitializationMode(fmu)
 ```
 
 
@@ -325,9 +310,14 @@ Now the FMU has been initialized correctly, the FMU can be simulated. The `fmiSi
 
 
 ```julia
-simData = fmiSimulate(myFMU, (tStart, tStop); recordValues=params[1:3], saveat=tSave, 
+simData = fmiSimulate(fmu, (tStart, tStop); recordValues=params[1:3], saveat=tSave, 
                         instantiate=false, setup=false, freeInstance=false, terminate=false, reset=false)
 ```
+
+    [34mSimulating CS-FMU ...   0%|█                             |  ETA: N/A[39m
+
+    [34mSimulating CS-FMU ... 100%|██████████████████████████████| Time: 0:00:01[39m
+    
 
 
 
@@ -340,13 +330,20 @@ simData = fmiSimulate(myFMU, (tStart, tStop); recordValues=params[1:3], saveat=t
     	In-place: 0
     	Out-of-place: 0
     Jacobian-Evaluations:
+    	∂ẋ_∂p: 0
     	∂ẋ_∂x: 0
     	∂ẋ_∂u: 0
+    	∂y_∂p: 0
     	∂y_∂x: 0
     	∂y_∂u: 0
+    	∂e_∂p: 0
+    	∂e_∂x: 0
+    	∂e_∂u: 0
+    	∂xr_∂xl: 0
     Gradient-Evaluations:
     	∂ẋ_∂t: 0
     	∂y_∂t: 0
+    	∂e_∂t: 0
     Callback-Evaluations:
     	Condition (event-indicators): 0
     	Time-Choice (event-instances): 0
@@ -354,10 +351,10 @@ simData = fmiSimulate(myFMU, (tStart, tStop); recordValues=params[1:3], saveat=t
     	Save values: 0
     	Steps completed: 0
     Values [2]:
-    	0.0	(38.15822216433163, 1.0, 32.0)
-    	1.0	(38.15822216433163, 1.0, 32.0)
+    	0.0	(22.092766687157837, 1.0, 41.0)
+    	1.0	(22.092766687157837, 1.0, 41.0)
     Events [0]:
-
+    
 
 
 
@@ -367,32 +364,10 @@ To show the second variant, it is necessary to terminate and reset the FMU insta
 
 
 ```julia
-fmiTerminate(myFMU)
-fmiReset(myFMU)
-fmiSetupExperiment(myFMU, tStart, tStop)
+fmiTerminate(fmu)
+fmiReset(fmu)
+fmiSetupExperiment(fmu, tStart, tStop)
 ```
-
-    [[32mOK[0m][CvodeStatistics][IO]: Sundials CVode Statistics
-        Stop time                                : 1.00 s
-        Simulation time                          : 8.71 s
-        Number of external steps                 : 1
-        Number of internal steps                 : 3
-        Number of non-linear iterations          : 3
-        Number of non-linear convergence failures: 0
-        Number of f function evaluations         : 7
-        Number of g function evaluations         : 4
-        Number of Jacobian-evaluations (direct)  : 1
-        Maximum integration order                : 1
-        Suggested tolerance scale factor         : 1.0
-        Grouping used                            : no
-    
-    [[32mOK[0m][][IO]: Rejected count
-        Number of external steps                 : 0
-        Number of internal steps                 : 0
-        Number of f function evaluations         : 0
-        Number of Jac function evaluations       : 0
-    
-
 
 
 
@@ -411,7 +386,7 @@ rndReal, rndBoolean, rndInteger, rndString = generateRandomNumbers()
 
 
 
-    (37.69546706433636, false, 80, "Random number 69.53185488820604!")
+    (49.79810246858381, true, 46, "Random number 29.544349341029353!")
 
 
 
@@ -419,10 +394,10 @@ In the second variant, the value for each data type is set separately by the cor
 
 
 ```julia
-fmiSetReal(myFMU, "p_real", rndReal)
-fmiSetBoolean(myFMU, "p_boolean", rndBoolean)
-fmiSetInteger(myFMU, "p_integer", rndInteger)
-fmiSetString(myFMU, "p_string", rndString)
+fmiSetReal(fmu, "p_real", rndReal)
+fmiSetBoolean(fmu, "p_boolean", rndBoolean)
+fmiSetInteger(fmu, "p_integer", rndInteger)
+fmiSetString(fmu, "p_string", rndString)
 ```
 
 
@@ -442,12 +417,12 @@ As before, the FMU must be in initialization mode.
 
 
 ```julia
-fmiEnterInitializationMode(myFMU)
-# fmiGetReal(myFMU, "u_real")
-# fmiGetBoolean(myFMU, "u_boolean")
-# fmiGetInteger(myFMU, "u_integer")
-# fmiGetString(myFMU, "p_string")
-fmiExitInitializationMode(myFMU)
+fmiEnterInitializationMode(fmu)
+# fmiGetReal(fmu, "u_real")
+# fmiGetBoolean(fmu, "u_boolean")
+# fmiGetInteger(fmu, "u_integer")
+# fmiGetString(fmu, "p_string")
+fmiExitInitializationMode(fmu)
 ```
 
 
@@ -461,7 +436,7 @@ From here on, you may want to simulate the FMU. Please note, that with the defau
 
 
 ```julia
-simData = fmiSimulate(myFMU, (tStart, tStop); recordValues=params[1:3], saveat=tSave, 
+simData = fmiSimulate(fmu, (tStart, tStop); recordValues=params[1:3], saveat=tSave, 
                         instantiate=false, setup=false)
 ```
 
@@ -476,13 +451,20 @@ simData = fmiSimulate(myFMU, (tStart, tStop); recordValues=params[1:3], saveat=t
     	In-place: 0
     	Out-of-place: 0
     Jacobian-Evaluations:
+    	∂ẋ_∂p: 0
     	∂ẋ_∂x: 0
     	∂ẋ_∂u: 0
+    	∂y_∂p: 0
     	∂y_∂x: 0
     	∂y_∂u: 0
+    	∂e_∂p: 0
+    	∂e_∂x: 0
+    	∂e_∂u: 0
+    	∂xr_∂xl: 0
     Gradient-Evaluations:
     	∂ẋ_∂t: 0
     	∂y_∂t: 0
+    	∂e_∂t: 0
     Callback-Evaluations:
     	Condition (event-indicators): 0
     	Time-Choice (event-instances): 0
@@ -490,10 +472,10 @@ simData = fmiSimulate(myFMU, (tStart, tStop); recordValues=params[1:3], saveat=t
     	Save values: 0
     	Steps completed: 0
     Values [2]:
-    	0.0	(37.69546706433636, 0.0, 80.0)
-    	1.0	(37.69546706433636, 0.0, 80.0)
+    	0.0	(49.79810246858381, 1.0, 46.0)
+    	1.0	(49.79810246858381, 1.0, 46.0)
     Events [0]:
-
+    
 
 
 
@@ -503,7 +485,7 @@ The FMU will be unloaded and all unpacked data on disc will be removed.
 
 
 ```julia
-fmiUnload(myFMU)
+fmiUnload(fmu)
 ```
 
 ### Summary

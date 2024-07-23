@@ -1,6 +1,8 @@
 # Multiple Instances of an FMU
 Tutorial by Johannes Stoljar, Tobias Thummerer
 
+🚧 This tutorial is under revision and will be replaced by an up-to-date version soon 🚧
+
 ## License
 
 
@@ -11,7 +13,7 @@ Tutorial by Johannes Stoljar, Tobias Thummerer
 ```
 
 ## Motivation
-This Julia Package *FMI.jl* is motivated by the use of simulation models in Julia. Here the FMI specification is implemented. FMI (*Functional Mock-up Interface*) is a free standard ([fmi-standard.org](http://fmi-standard.org/)) that defines a container and an interface to exchange dynamic models using a combination of XML files, binaries and C code zipped into a single file. The user can thus use simulation models in the form of an FMU (*Functional Mock-up Units*). Besides loading the FMU, the user can also set values for parameters and states and simulate the FMU both as co-simulation and model exchange simulation.
+This Julia Package *FMI.jl* is motivated by the use of simulation models in Julia. Here the FMI specification is implemented. FMI (*Functional Mock-up Interface*) is a free standard ([fmi-standard.org](https://fmi-standard.org/)) that defines a container and an interface to exchange dynamic models using a combination of XML files, binaries and C code zipped into a single file. The user can thus use simulation models in the form of an FMU (*Functional Mock-up Units*). Besides loading the FMU, the user can also set values for parameters and states and simulate the FMU both as co-simulation and model exchange simulation.
 
 ## Introduction to the example
 In this example we want to show that it is possible to create different instances of an FMU. The different instances can then be used to run independent simulations. After the FMU has been simulated, the simulation results are displayed in a graph. The used model is a one-dimensional spring pendulum without friction. The object-orientated structure of the *SpringPendulum1D* can be seen in the following graphic.
@@ -109,7 +111,7 @@ fmiInfo(myFMU)
     		Serialize State:	true
     		Dir. Derivatives:	true
     ##################### End information for FMU #####################
-
+    
 
 ### First Instance
 
@@ -124,12 +126,12 @@ println(comp1)
 
     FMU:            SpringPendulum1D
     InstanceName:   SpringPendulum1D
-    Address:        Ptr{Nothing} @0x0000000011ede000
+    Address:        Ptr{Nothing} @0x0000023c15a09340
     State:          0
     Logging:        1
     FMU time:       -Inf
     FMU states:     nothing
-
+    
 
 Next, a dictionary for the parameters is created. With this dictionary you can set the initial states of the variables of the FMU. For the spring constant `spring.c` a value of $10.0 \frac{N}{m}$ and for the position of the mass `mass.s` a value of $1.0 m$ is set. The created dictionary with the specified variables for recording are passed to the command for simulation. In addition, other keywords are set. On the one hand the keyword `instantiate=false` is set, which prevents that in the simulation command a new instance is created. On the other hand the keyword `freeInstance=false` is set, this prevents that after the simulation command the instance is released. 
 
@@ -140,11 +142,18 @@ data1 = fmiSimulate(comp1, (tStart, tStop); parameters=param1, recordValues=vrs,
 fig = fmiPlot(data1)
 ```
 
+    [34mSimulating CS-FMU ...   0%|█                             |  ETA: N/A[39m
+
+    [34mSimulating CS-FMU ... 100%|██████████████████████████████| Time: 0:00:01[39m
+
+    
+    
+
 
 
 
     
-![svg](multiple_instances_files/multiple_instances_12_0.svg)
+![svg](multiple_instances_files/multiple_instances_12_3.svg)
     
 
 
@@ -169,12 +178,12 @@ println(comp2)
 
     FMU:            SpringPendulum1D
     InstanceName:   SpringPendulum1D
-    Address:        Ptr{Nothing} @0x000000000f467d60
+    Address:        Ptr{Nothing} @0x0000023c15a0a3d0
     State:          0
     Logging:        1
     FMU time:       -Inf
     FMU states:     nothing
-
+    
 
 The addresses of the instantiated FMUs must differ, and you can see that in the comparison below.
 

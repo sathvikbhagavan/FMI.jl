@@ -1,6 +1,8 @@
 # Simulate an FMU in different modes
 Tutorial by Johannes Stoljar, Tobias Thummerer
 
+🚧 This tutorial is under revision and will be replaced by an up-to-date version soon 🚧
+
 ## License
 
 
@@ -110,7 +112,7 @@ fmiInfo(myFMU)
     		Serialize State:	true
     		Dir. Derivatives:	true
     ##################### End information for FMU #####################
-
+    
 
 ### Simulate FMU
 
@@ -127,6 +129,11 @@ vrs = ["mass.s", "mass.v"]
 dataCS = fmiSimulateCS(myFMU, (tStart, tStop); recordValues=vrs, saveat=tSave)
 ```
 
+    [34mSimulating CS-FMU ...   0%|█                             |  ETA: N/A[39m
+
+    [34mSimulating CS-FMU ... 100%|██████████████████████████████| Time: 0:00:01[39m
+    
+
 
 
 
@@ -138,13 +145,20 @@ dataCS = fmiSimulateCS(myFMU, (tStart, tStop); recordValues=vrs, saveat=tSave)
     	In-place: 0
     	Out-of-place: 0
     Jacobian-Evaluations:
+    	∂ẋ_∂p: 0
     	∂ẋ_∂x: 0
     	∂ẋ_∂u: 0
+    	∂y_∂p: 0
     	∂y_∂x: 0
     	∂y_∂u: 0
+    	∂e_∂p: 0
+    	∂e_∂x: 0
+    	∂e_∂u: 0
+    	∂xr_∂xl: 0
     Gradient-Evaluations:
     	∂ẋ_∂t: 0
     	∂y_∂t: 0
+    	∂e_∂t: 0
     Callback-Evaluations:
     	Condition (event-indicators): 0
     	Time-Choice (event-instances): 0
@@ -162,9 +176,9 @@ dataCS = fmiSimulateCS(myFMU, (tStart, tStop); recordValues=vrs, saveat=tSave)
     	0.07	(0.5105886522837868, 0.30295578207463486)
     	0.08	(0.5138351439717114, 0.3464184707972189)
     	...
-    	8.0	(1.071367253976742, -1.000814138594347e-10)
+    	8.0	(1.0713672543616686, -1.0008145180651074e-10)
     Events [0]:
-
+    
 
 
 
@@ -177,11 +191,10 @@ In the function `fmiSimulateME()` the FMU is simulated in model-exchange mode (M
 dataME = fmiSimulateME(myFMU, (tStart, tStop); saveat=tSave)
 ```
 
-    [33m[1m┌ [22m[39m[33m[1mWarning: [22m[39mUsing arrays or dicts to store parameters of different types can hurt performance.
-    [33m[1m│ [22m[39mConsider using tuples instead.
-    [33m[1m└ [22m[39m[90m@ SciMLBase ~/.julia/packages/SciMLBase/kTUaf/src/performance_warnings.jl:32[39m
-    [34mSimulating ME-FMU ... 100%|██████████████████████████████| Time: 0:00:19[39m
+    [34mSimulating ME-FMU ...   0%|█                             |  ETA: N/A[39m
 
+    [34mSimulating ME-FMU ... 100%|██████████████████████████████| Time: 0:00:10[39m
+    
 
 
 
@@ -194,13 +207,20 @@ dataME = fmiSimulateME(myFMU, (tStart, tStop); saveat=tSave)
     	In-place: 1377
     	Out-of-place: 0
     Jacobian-Evaluations:
+    	∂ẋ_∂p: 0
     	∂ẋ_∂x: 0
     	∂ẋ_∂u: 0
+    	∂y_∂p: 0
     	∂y_∂x: 0
     	∂y_∂u: 0
+    	∂e_∂p: 0
+    	∂e_∂x: 0
+    	∂e_∂u: 0
+    	∂xr_∂xl: 0
     Gradient-Evaluations:
     	∂ẋ_∂t: 0
     	∂y_∂t: 0
+    	∂e_∂t: 0
     Callback-Evaluations:
     	Condition (event-indicators): 1717
     	Time-Choice (event-instances): 0
@@ -220,13 +240,13 @@ dataME = fmiSimulateME(myFMU, (tStart, tStop); saveat=tSave)
     	...
     	8.0	[1.0666322778272936, -7.60398591662422e-5]
     Events [6]:
-    	State-Event #11 @ 0.0s
-    	State-Event #11 @ 0.994s
-    	State-Event #19 @ 1.9883s
-    	State-Event #11 @ 2.9831s
-    	State-Event #19 @ 3.9789s
-    	State-Event #11 @ 4.977s
-
+    	State-Event #11 @ 2.352941176471972e-11s (state-change: false)
+    	State-Event #11 @ 0.9940419053523292s (state-change: false)
+    	State-Event #19 @ 1.9883196278897572s (state-change: false)
+    	State-Event #11 @ 2.9830800897371383s (state-change: false)
+    	State-Event #19 @ 3.978881604042462s (state-change: false)
+    	State-Event #11 @ 4.9769936454552255s (state-change: false)
+    
 
 
 
